@@ -41,8 +41,7 @@ async function cargarDatos() {
         
         // ✅ FILTRO CORREGIDO: Usar .trim() para eliminar espacios
         datosOriginales = parsed.data.filter(row => 
-            row.CARRIL && 
-            row.PILA && 
+            row.CARRIL &&  
             row.PARQUE && 
             row.PARQUE.trim() === 'KG'
         );
