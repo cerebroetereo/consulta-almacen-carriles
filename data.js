@@ -37,16 +37,43 @@ async function cargarDatos() {
             }
         });
         
-        // ✅ DEBUGGING: Mostrar cuántas filas se parsearon
-        console.log('Filas parseadas:', parsed.data.length);
-        console.log('Primeras 3 filas:', parsed.data.slice(0, 3));
+        // 🔍 DEBUGGING MEJORADO: Ver TODAS las columnas y valores de PARQUE
+        console.log('========== DIAGNÓSTICO COMPLETO ==========');
+        console.log('Total filas parseadas:', parsed.data.length);
+        console.log('Columnas disponibles:', Object.keys(parsed.data[0] || {}));
+        console.log('Primeras 5 filas completas:', parsed.data.slice(0, 5));
         
+        // Ver valores únicos de la columna PARQUE
+        const valoresParque = [...new Set(parsed.data.map(r => r.PARQUE))];
+        console.log('Valores únicos en PARQUE:', valoresParque);
+        console.log('Cantidad de valores en PARQUE:', valoresParque.map(v => {
+            const count = parsed.data.filter(r => r.PARQUE === v).length;
+            return `"${v}": ${count} filas`;
+        }));
+        
+        // Contar filas con PARQUE exactamente igual a "KG"
+        const conParqueKG = parsed.data.filter(row => row.PARQUE === 'KG');
+        console.log('Filas con PARQUE === "KG":', conParqueKG.length);
+        
+        // Contar filas con PARQUE que CONTENGA "KG" (case insensitive)
+        const conParqueKGFlexible = parsed.data.filter(row => 
+            row.PARQUE && row.PARQUE.toString().toUpperCase().includes('KG')
+        );
+        console.log('Filas con PARQUE que contiene "KG":', conParqueKGFlexible.length);
+        
+        // Mostrar algunas filas que SÍ tienen datos
+        console.log('Muestra de filas con CARRIL y PILA:', 
+            parsed.data.filter(r => r.CARRIL && r.PILA).slice(0, 3)
+        );
+        console.log('==========================================');
+        
+        // FILTRO ORIGINAL (estricto)
         datosOriginales = parsed.data.filter(row => row.CARRIL && row.PILA && row.PARQUE === 'KG');
         datos = [...datosOriginales];
         
         // ✅ VALIDACIÓN: Verificar que hay datos después del filtro
         if (datos.length === 0) {
-            throw new Error('No se encontraron datos con PARQUE = "KG"');
+            throw new Error('No se encontraron datos con PARQUE = "KG". Revisa la consola para ver qué valores existen.');
         }
         
         inicializarFiltros();
