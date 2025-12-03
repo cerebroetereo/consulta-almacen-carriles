@@ -75,6 +75,7 @@ function inicializarFiltros() {
     const troqueles = [...new Set(datos.map(r => r.TROQUEL).filter(Boolean))].sort();
     const resultsEnsMec = [...new Set(datos.map(r => r.RESULT_ENS_MEC).filter(Boolean))].sort();
     const codUltCal = [...new Set(datos.map(r => r.CODIG_ULTIMA_CAL).filter(Boolean))].sort();
+    const taladros = [...new Set(datos.map(r => r.TALADROS).filter(Boolean))].sort((a, b) => a - b);
     
     const calidadSelect = document.getElementById('calidad');
     const formatoSelect = document.getElementById('formato');
@@ -84,6 +85,7 @@ function inicializarFiltros() {
     const troquelSelect = document.getElementById('troquel');
     const resultEnsMecSelect = document.getElementById('result_ens_mec');
     const codUltCalSelect = document.getElementById('codig_ultima_cal');
+    const taladrosSelect = document.getElementById('taladros');
     
     calidades.forEach(v => {
         const o = document.createElement('option');
@@ -140,6 +142,13 @@ function inicializarFiltros() {
         o.textContent = v;
         codUltCalSelect.appendChild(o);
     });
+    
+    taladros.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        taladrosSelect.appendChild(o);
+    });
 }
 
 function filtrarDatos() {
@@ -153,6 +162,7 @@ function filtrarDatos() {
     const troquel = document.getElementById('troquel').value;
     const resultEnsMec = document.getElementById('result_ens_mec').value;
     const codUltCal = document.getElementById('codig_ultima_cal').value;
+    const taladros = document.getElementById('taladros').value;
     
     let filtrados = datosOriginales.filter(row => {
         return (!calidad || row.CALIDAD === calidad) &&
@@ -163,7 +173,8 @@ function filtrarDatos() {
                (!estampado || row.ESTAMPADO === estampado) &&
                (!troquel || row.TROQUEL === troquel) &&
                (!resultEnsMec || row.RESULT_ENS_MEC === resultEnsMec) &&
-               (!codUltCal || row.CODIG_ULTIMA_CAL === codUltCal);
+               (!codUltCal || row.CODIG_ULTIMA_CAL === codUltCal) &&
+               (!taladros || row.TALADROS == taladros);
     });
     
     const agrupado = {};
@@ -211,6 +222,7 @@ function limpiarFiltros() {
     document.getElementById('troquel').value = '';
     document.getElementById('result_ens_mec').value = '';
     document.getElementById('codig_ultima_cal').value = '';
+    document.getElementById('taladros').value = '';
     
     document.getElementById('resultado').classList.add('oculto');
 }
