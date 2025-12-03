@@ -20,7 +20,7 @@ async function cargarDatos() {
             }
         });
         
-        datosOriginales = parsed.data.filter(row => row.CARRIL && row.PILA);
+        datosOriginales = parsed.data.filter(row => row.CARRIL && row.PILA && row.PARQUE === 'KG');
         datos = [...datosOriginales];
         
         inicializarFiltros();
