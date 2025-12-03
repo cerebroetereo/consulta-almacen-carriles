@@ -41,7 +41,7 @@ async function cargarDatos() {
         // ✅ FILTRO CORREGIDO: Solo requiere PARQUE="KG" (sin restricción de CARRIL ni PILA)
         datosOriginales = parsed.data.filter(row => 
             row.PARQUE && 
-            row.PARQUE.trim() === 'KG'
+            row.PARQUE.trim() === 'KG    '
         );
         
         console.log('Filas con PARQUE="KG":', datosOriginales.length);
