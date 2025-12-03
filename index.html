@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Almacén Carriles</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Situación Almacén Carriles</h1>
+        
+        <div class="filtros">
+            <div class="filtro-grupo">
+                <label>CALIDAD:</label>
+                <select id="calidad"><option value="">Todas</option></select>
+            </div>
+            <div class="filtro-grupo">
+                <label>FORMATO:</label>
+                <select id="formato"><option value="">Todos</option></select>
+            </div>
+            <div class="filtro-grupo">
+                <label>LONGITUD (mm):</label>
+                <input type="number" id="long_min" placeholder="Mín" step="100">
+                <span>-</span>
+                <input type="number" id="long_max" placeholder="Máx" step="100">
+            </div>
+            <div class="filtro-grupo">
+                <label>PILA:</label>
+                <select id="pila"><option value="">Todas</option></select>
+            </div>
+            <button id="buscar">🔍 Buscar</button>
+            <button id="limpiar">🧹 Limpiar</button>
+        </div>
+
+        <div id="resultado" class="resultado oculto">
+            <h3>Resultado por Pila (<span id="total_filas">0</span> tipos encontrados)</h3>
+            <table id="tabla_resultado">
+                <thead>
+                    <tr>
+                        <th>PILA</th>
+                        <th>Nº Barras</th>
+                        <th>Peso Total (kg)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="cargando" class="cargando oculto">⏳ Cargando datos...</div>
+        <div id="error" class="error oculto"></div>
+        <div id="ultima_actualizacion"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script>
+        // CONFIGURACIÓN - CAMBIA SOLO ESTA URL
+        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QJ3f8X_SuwV7B9-jE4yi4AyM-KH2sFIP5jQ0WTu-oLs/pub?output=csv';
+        
+        // Cargar datos al iniciar
+        window.onload = function() {
+            cargarDatos();
+        };
+    </script>
+    <script src="data.js"></script>
+</body>
+</html>
