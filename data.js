@@ -36,43 +36,20 @@ async function cargarDatos() {
             }
         });
         
-        // 🔍 DEBUGGING MEJORADO
-        console.log('========== DIAGNÓSTICO COMPLETO ==========');
-        console.log('Total filas parseadas:', parsed.data.length);
-        console.log('Columnas disponibles:', Object.keys(parsed.data[0] || {}));
-        console.log('Primeras 5 filas completas:', parsed.data.slice(0, 5));
+        console.log('Filas parseadas:', parsed.data.length);
+        console.log('Primeras 3 filas:', parsed.data.slice(0, 3));
         
-        const valoresParque = [...new Set(parsed.data.map(r => r.PARQUE))];
-        console.log('Valores únicos en PARQUE:', valoresParque);
-        console.log('Cantidad de valores en PARQUE:', valoresParque.map(v => {
-            const count = parsed.data.filter(r => r.PARQUE === v).length;
-            return `"${v}": ${count} filas`;
-        }));
-        
-        const conParqueKG = parsed.data.filter(row => row.PARQUE === 'KG');
-        console.log('Filas con PARQUE === "KG":', conParqueKG.length);
-        
-        const conParqueKGFlexible = parsed.data.filter(row => 
-            row.PARQUE && row.PARQUE.toString().toUpperCase().includes('KG')
-        );
-        console.log('Filas con PARQUE que contiene "KG":', conParqueKGFlexible.length);
-        
-        console.log('Muestra de filas con CARRIL y PILA:', 
-            parsed.data.filter(r => r.CARRIL && r.PILA).slice(0, 3)
-        );
-        console.log('==========================================');
-        
-        // ✅ FILTRO CORREGIDO: Buscar "KG" dentro del texto (flexible)
+        // ✅ FILTRO DEFINITIVO: Eliminar espacios con .trim()
         datosOriginales = parsed.data.filter(row => 
             row.CARRIL && 
             row.PILA && 
             row.PARQUE && 
-            row.PARQUE.toString().toUpperCase().includes('KG')
+            row.PARQUE.trim() === 'KG'
         );
         datos = [...datosOriginales];
         
         if (datos.length === 0) {
-            throw new Error('No se encontraron datos con PARQUE que contenga "KG"');
+            throw new Error('No se encontraron datos con PARQUE = "KG"');
         }
         
         inicializarFiltros();
@@ -89,7 +66,6 @@ async function cargarDatos() {
         document.getElementById('cargando').classList.add('oculto');
     }
 }
-
 
 function inicializarFiltros() {
     const calidades = [...new Set(datos.map(r => r.CALIDAD).filter(Boolean))].sort();
