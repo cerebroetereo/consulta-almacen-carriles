@@ -42,29 +42,77 @@ function inicializarFiltros() {
     const formatos = [...new Set(datos.map(r => r.FORMATO).filter(Boolean))].sort();
     const pilas = [...new Set(datos.map(r => r.PILA).filter(Boolean))].sort();
     
+    // NUEVOS FILTROS
+    const codEstados = [...new Set(datos.map(r => r.COD_ESTADO).filter(Boolean))].sort();
+    const estampados = [...new Set(datos.map(r => r.ESTAMPADO).filter(Boolean))].sort();
+    const troqueles = [...new Set(datos.map(r => r.TROQUEL).filter(Boolean))].sort();
+    const resultsEnsMec = [...new Set(datos.map(r => r.RESULT_ENS_MEC).filter(Boolean))].sort();
+    const codUltCal = [...new Set(datos.map(r => r.CODIG_ULTIMA_CAL).filter(Boolean))].sort();
+    
     const calidadSelect = document.getElementById('calidad');
     const formatoSelect = document.getElementById('formato');
     const pilaSelect = document.getElementById('pila');
+    const codEstadoSelect = document.getElementById('cod_estado');
+    const estampadoSelect = document.getElementById('estampado');
+    const troquelSelect = document.getElementById('troquel');
+    const resultEnsMecSelect = document.getElementById('result_ens_mec');
+    const codUltCalSelect = document.getElementById('codig_ultima_cal');
     
-    calidades.forEach(calidad => {
-        const option = document.createElement('option');
-        option.value = calidad;
-        option.textContent = calidad;
-        calidadSelect.appendChild(option);
+    calidades.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        calidadSelect.appendChild(o);
     });
     
-    formatos.forEach(formato => {
-        const option = document.createElement('option');
-        option.value = formato;
-        option.textContent = formato;
-        formatoSelect.appendChild(option);
+    formatos.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        formatoSelect.appendChild(o);
     });
     
-    pilas.forEach(pila => {
-        const option = document.createElement('option');
-        option.value = pila;
-        option.textContent = pila;
-        pilaSelect.appendChild(option);
+    pilas.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        pilaSelect.appendChild(o);
+    });
+    
+    // POBLAR NUEVOS SELECTS
+    codEstados.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        codEstadoSelect.appendChild(o);
+    });
+    
+    estampados.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        estampadoSelect.appendChild(o);
+    });
+    
+    troqueles.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        troquelSelect.appendChild(o);
+    });
+    
+    resultsEnsMec.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        resultEnsMecSelect.appendChild(o);
+    });
+    
+    codUltCal.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; 
+        o.textContent = v;
+        codUltCalSelect.appendChild(o);
     });
 }
 
@@ -78,12 +126,24 @@ function filtrarDatos() {
     const longMax = parseInt(document.getElementById('long_max').value) || Infinity;
     const pila = document.getElementById('pila').value;
     
-    // Filtrar datos
+    // LECTURA DE LOS NUEVOS FILTROS
+    const codEstado = document.getElementById('cod_estado').value;
+    const estampado = document.getElementById('estampado').value;
+    const troquel = document.getElementById('troquel').value;
+    const resultEnsMec = document.getElementById('result_ens_mec').value;
+    const codUltCal = document.getElementById('codig_ultima_cal').value;
+    
+    // Filtrar datos (CON NUEVOS FILTROS APLICADOS)
     let filtrados = datosOriginales.filter(row => {
         return (!calidad || row.CALIDAD === calidad) &&
                (!formato || row.FORMATO === formato) &&
                (row.LONGITUD >= longMin && row.LONGITUD <= longMax) &&
-               (!pila || row.PILA === pila);
+               (!pila || row.PILA === pila) &&
+               (!codEstado || row.COD_ESTADO === codEstado) &&
+               (!estampado || row.ESTAMPADO === estampado) &&
+               (!troquel || row.TROQUEL === troquel) &&
+               (!resultEnsMec || row.RESULT_ENS_MEC === resultEnsMec) &&
+               (!codUltCal || row.CODIG_ULTIMA_CAL === codUltCal);
     });
     
     // Agrupar por PILA
@@ -94,7 +154,7 @@ function filtrarDatos() {
             agrupado[p] = { count: 0, peso: 0 };
         }
         agrupado[p].count++;
-        agrupado[p].peso += (row.PESO || 0);
+        agrupado[p].peso += Number(row.PESO || 0);
     });
     
     // Mostrar resultados
@@ -128,5 +188,13 @@ function limpiarFiltros() {
     document.getElementById('long_min').value = '';
     document.getElementById('long_max').value = '';
     document.getElementById('pila').value = '';
+    
+    // LIMPIAR NUEVOS FILTROS
+    document.getElementById('cod_estado').value = '';
+    document.getElementById('estampado').value = '';
+    document.getElementById('troquel').value = '';
+    document.getElementById('result_ens_mec').value = '';
+    document.getElementById('codig_ultima_cal').value = '';
+    
     document.getElementById('resultado').classList.add('oculto');
 }
