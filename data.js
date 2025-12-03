@@ -39,7 +39,7 @@ async function cargarDatos() {
         console.log('Filas parseadas:', parsed.data.length);
         console.log('Primeras 3 filas:', parsed.data.slice(0, 3));
         
-        // ✅ FILTRO DEFINITIVO: Eliminar espacios con .trim()
+        // ✅ FILTRO CORREGIDO: Usar .trim() para eliminar espacios
         datosOriginales = parsed.data.filter(row => 
             row.CARRIL && 
             row.PILA && 
