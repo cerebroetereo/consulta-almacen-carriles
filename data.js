@@ -1,6 +1,17 @@
 let datos = [];
 let datosOriginales = [];
 
+// ✅ ESPERAR A QUE EL DOM ESTÉ LISTO
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Registrar event listeners DESPUÉS de que existan los elementos
+    document.getElementById('buscar').addEventListener('click', filtrarDatos);
+    document.getElementById('limpiar').addEventListener('click', limpiarFiltros);
+    
+    // Cargar datos automáticamente
+    cargarDatos();
+});
+
 async function cargarDatos() {
     document.getElementById('cargando').classList.remove('oculto');
     
@@ -9,6 +20,12 @@ async function cargarDatos() {
         if (!response.ok) throw new Error('No se pudo cargar el CSV');
         
         const csvText = await response.text();
+        
+        // ✅ VALIDACIÓN: Verificar que Papa está cargado
+        if (typeof Papa === 'undefined') {
+            throw new Error('PapaParse no está cargado. Verifica el CDN.');
+        }
+        
         const parsed = Papa.parse(csvText, {
             header: true,
             skipEmptyLines: true,
@@ -20,17 +37,27 @@ async function cargarDatos() {
             }
         });
         
+        // ✅ DEBUGGING: Mostrar cuántas filas se parsearon
+        console.log('Filas parseadas:', parsed.data.length);
+        console.log('Primeras 3 filas:', parsed.data.slice(0, 3));
+        
         datosOriginales = parsed.data.filter(row => row.CARRIL && row.PILA && row.PARQUE === 'KG');
         datos = [...datosOriginales];
+        
+        // ✅ VALIDACIÓN: Verificar que hay datos después del filtro
+        if (datos.length === 0) {
+            throw new Error('No se encontraron datos con PARQUE = "KG"');
+        }
         
         inicializarFiltros();
         document.getElementById('ultima_actualizacion').innerHTML = 
             `✅ Datos cargados: ${datos.length.toLocaleString()} carriles`;
             
     } catch (error) {
+        console.error('Error detallado:', error);
         document.getElementById('error').innerHTML = 
             `❌ Error cargando datos: ${error.message}<br>
-             Verifica que la Google Sheet esté publicada como CSV`;
+             <small>Abre la consola del navegador (F12) para más detalles</small>`;
         document.getElementById('error').classList.remove('oculto');
     } finally {
         document.getElementById('cargando').classList.add('oculto');
@@ -41,8 +68,6 @@ function inicializarFiltros() {
     const calidades = [...new Set(datos.map(r => r.CALIDAD).filter(Boolean))].sort();
     const formatos = [...new Set(datos.map(r => r.FORMATO).filter(Boolean))].sort();
     const pilas = [...new Set(datos.map(r => r.PILA).filter(Boolean))].sort();
-    
-    // NUEVOS FILTROS
     const codEstados = [...new Set(datos.map(r => r.COD_ESTADO).filter(Boolean))].sort();
     const estampados = [...new Set(datos.map(r => r.ESTAMPADO).filter(Boolean))].sort();
     const troqueles = [...new Set(datos.map(r => r.TROQUEL).filter(Boolean))].sort();
@@ -79,7 +104,6 @@ function inicializarFiltros() {
         pilaSelect.appendChild(o);
     });
     
-    // POBLAR NUEVOS SELECTS
     codEstados.forEach(v => {
         const o = document.createElement('option');
         o.value = v; 
@@ -116,24 +140,18 @@ function inicializarFiltros() {
     });
 }
 
-document.getElementById('buscar').addEventListener('click', filtrarDatos);
-document.getElementById('limpiar').addEventListener('click', limpiarFiltros);
-
 function filtrarDatos() {
     const calidad = document.getElementById('calidad').value;
     const formato = document.getElementById('formato').value;
     const longMin = parseInt(document.getElementById('long_min').value) || 0;
     const longMax = parseInt(document.getElementById('long_max').value) || Infinity;
     const pila = document.getElementById('pila').value;
-    
-    // LECTURA DE LOS NUEVOS FILTROS
     const codEstado = document.getElementById('cod_estado').value;
     const estampado = document.getElementById('estampado').value;
     const troquel = document.getElementById('troquel').value;
     const resultEnsMec = document.getElementById('result_ens_mec').value;
     const codUltCal = document.getElementById('codig_ultima_cal').value;
     
-    // Filtrar datos (CON NUEVOS FILTROS APLICADOS)
     let filtrados = datosOriginales.filter(row => {
         return (!calidad || row.CALIDAD === calidad) &&
                (!formato || row.FORMATO === formato) &&
@@ -146,7 +164,6 @@ function filtrarDatos() {
                (!codUltCal || row.CODIG_ULTIMA_CAL === codUltCal);
     });
     
-    // Agrupar por PILA
     const agrupado = {};
     filtrados.forEach(row => {
         const p = row.PILA;
@@ -157,7 +174,6 @@ function filtrarDatos() {
         agrupado[p].peso += Number(row.PESO || 0);
     });
     
-    // Mostrar resultados
     mostrarResultados(agrupado, Object.keys(agrupado).length);
 }
 
@@ -188,8 +204,6 @@ function limpiarFiltros() {
     document.getElementById('long_min').value = '';
     document.getElementById('long_max').value = '';
     document.getElementById('pila').value = '';
-    
-    // LIMPIAR NUEVOS FILTROS
     document.getElementById('cod_estado').value = '';
     document.getElementById('estampado').value = '';
     document.getElementById('troquel').value = '';
