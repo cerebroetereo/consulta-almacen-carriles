@@ -37,12 +37,10 @@ async function cargarDatos() {
         });
         
         console.log('Filas parseadas:', parsed.data.length);
-        console.log('Primeras 3 filas:', parsed.data.slice(0, 3));
         
-        // ✅ FILTRO CORREGIDO: Usar .trim() para eliminar espacios
+        // ✅ FILTRO MODIFICADO: No requiere PILA, solo CARRIL y PARQUE="KG"
         datosOriginales = parsed.data.filter(row => 
             row.CARRIL && 
-            row.PILA && 
             row.PARQUE && 
             row.PARQUE.trim() === 'KG'
         );
@@ -70,7 +68,16 @@ async function cargarDatos() {
 function inicializarFiltros() {
     const calidades = [...new Set(datos.map(r => r.CALIDAD).filter(Boolean))].sort();
     const formatos = [...new Set(datos.map(r => r.FORMATO).filter(Boolean))].sort();
-    const pilas = [...new Set(datos.map(r => r.PILA).filter(Boolean))].sort();
+    
+    // ✅ MODIFICADO: Incluir "SIN UBICACION" para pilas vacías
+    const pilasRaw = datos.map(r => {
+        if (!r.PILA || r.PILA.trim() === '') {
+            return 'SIN UBICACION';
+        }
+        return r.PILA.trim();
+    });
+    const pilas = [...new Set(pilasRaw)].sort();
+    
     const codEstados = [...new Set(datos.map(r => r.COD_ESTADO).filter(Boolean))].sort();
     const estampados = [...new Set(datos.map(r => r.ESTAMPADO).filter(Boolean))].sort();
     const troqueles = [...new Set(datos.map(r => r.TROQUEL).filter(Boolean))].sort();
@@ -148,7 +155,7 @@ function filtrarDatos() {
     const formato = document.getElementById('formato').value;
     const longMin = parseInt(document.getElementById('long_min').value) || 0;
     const longMax = parseInt(document.getElementById('long_max').value) || Infinity;
-    const pila = document.getElementById('pila').value;
+    const pilaSeleccionada = document.getElementById('pila').value;
     const codEstado = document.getElementById('cod_estado').value;
     const estampado = document.getElementById('estampado').value;
     const troquel = document.getElementById('troquel').value;
@@ -156,10 +163,20 @@ function filtrarDatos() {
     const codUltCal = document.getElementById('codig_ultima_cal').value;
     
     let filtrados = datosOriginales.filter(row => {
+        // ✅ MODIFICADO: Manejar filtro de PILA con "SIN UBICACION"
+        let cumplePila = true;
+        if (pilaSeleccionada) {
+            if (pilaSeleccionada === 'SIN UBICACION') {
+                cumplePila = (!row.PILA || row.PILA.trim() === '');
+            } else {
+                cumplePila = (row.PILA && row.PILA.trim() === pilaSeleccionada);
+            }
+        }
+        
         return (!calidad || row.CALIDAD === calidad) &&
                (!formato || row.FORMATO === formato) &&
                (row.LONGITUD >= longMin && row.LONGITUD <= longMax) &&
-               (!pila || row.PILA === pila) &&
+               cumplePila &&
                (!codEstado || row.COD_ESTADO === codEstado) &&
                (!estampado || row.ESTAMPADO === estampado) &&
                (!troquel || row.TROQUEL === troquel) &&
@@ -167,9 +184,11 @@ function filtrarDatos() {
                (!codUltCal || row.CODIG_ULTIMA_CAL === codUltCal);
     });
     
+    // ✅ MODIFICADO: Agrupar usando "SIN UBICACION" para pilas vacías
     const agrupado = {};
     filtrados.forEach(row => {
-        const p = row.PILA;
+        let p = row.PILA && row.PILA.trim() !== '' ? row.PILA.trim() : 'SIN UBICACION';
+        
         if (!agrupado[p]) {
             agrupado[p] = { count: 0, peso: 0 };
         }
@@ -187,8 +206,13 @@ function mostrarResultados(agrupado, totalTipos) {
     tbody.innerHTML = '';
     totalSpan.textContent = totalTipos;
     
+    // ✅ MODIFICADO: Ordenar con "SIN UBICACION" al final
     Object.entries(agrupado)
-        .sort(([a], [b]) => a.localeCompare(b))
+        .sort(([a], [b]) => {
+            if (a === 'SIN UBICACION') return 1;
+            if (b === 'SIN UBICACION') return -1;
+            return a.localeCompare(b);
+        })
         .forEach(([pila, datos]) => {
             const row = tbody.insertRow();
             row.innerHTML = `
